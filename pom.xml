@@ -127,7 +127,6 @@
                         <exclude>**/TestCollector.java</exclude>
                     </excludes>
                     <parallel>none</parallel>
-                    <!--<threadCount>10</threadCount>-->
                     <argLine>${jacoco.agent.argLine}
                     </argLine>
                 </configuration>
@@ -147,7 +146,6 @@
                                 <include>**/*IT.java</include>
                             </includes>
                             <parallel>none</parallel>
-                            <!--<threadCount>10</threadCount>-->
                             <argLine>${jacoco.agent.argLine}
                             </argLine>
                         </configuration>

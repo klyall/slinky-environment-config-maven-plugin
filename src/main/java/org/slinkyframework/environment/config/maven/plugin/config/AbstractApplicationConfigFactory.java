@@ -30,8 +30,8 @@ public abstract class AbstractApplicationConfigFactory implements ConfigFileFact
 
     @Override
     public void generateFiles() {
-        File[] applications = findApplications(baseDir);
-        File[] environments = findEnvironments(baseDir);
+        File[] applications = findApplications();
+        File[] environments = findEnvironments();
 
         LOG.debug("Creating config for applications {} in environments {}", applications, environments);
 
@@ -60,7 +60,8 @@ public abstract class AbstractApplicationConfigFactory implements ConfigFileFact
         for (File environment : environments) {
             for (File application : applications) {
 
-                File applicationEnvironmentDir = new File(environment, APPLICATIONS_DIR + "/" + application.getName());
+                File applicationDir = new File(environment, APPLICATIONS_DIR);
+                File applicationEnvironmentDir = new File(applicationDir, application.getName());
 
                 File targetEnvironmentDir = new File(targetDir, environment.getName());
                 File targetApplicationDir = new File(targetEnvironmentDir, application.getName());
@@ -98,11 +99,11 @@ public abstract class AbstractApplicationConfigFactory implements ConfigFileFact
         }
     }
 
-    private File[] findApplications(File sourceDir) {
+    private File[] findApplications() {
         return listDirectories(APPLICATIONS_DIR);
     }
 
-    private File[] findEnvironments(File sourceDir) {
+    private File[] findEnvironments() {
         return listDirectories(ENVIRONMENTS_DIR);
     }
 

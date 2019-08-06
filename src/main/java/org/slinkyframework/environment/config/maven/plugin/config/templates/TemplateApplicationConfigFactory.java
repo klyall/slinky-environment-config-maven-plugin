@@ -4,17 +4,17 @@ import org.slinkyframework.environment.config.maven.plugin.config.AbstractApplic
 import org.slinkyframework.environment.config.maven.plugin.config.ConfigPropertyMerger;
 
 import java.io.File;
-import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 
 public class TemplateApplicationConfigFactory extends AbstractApplicationConfigFactory {
 
     public static final String TEMPLATES_DIR = "templates";
-    private LinkedHashSet<String> delimiters;
+    private Set<String> delimiters;
 
     private boolean failOnMissingProperty = false;
 
-    public TemplateApplicationConfigFactory(File sourceDir, File targetDir, LinkedHashSet<String> delimiters) {
+    public TemplateApplicationConfigFactory(File sourceDir, File targetDir, Set<String> delimiters) {
         super(sourceDir, targetDir);
         this.delimiters = delimiters;
     }

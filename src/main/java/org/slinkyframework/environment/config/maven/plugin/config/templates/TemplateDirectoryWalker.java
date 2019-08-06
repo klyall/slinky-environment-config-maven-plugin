@@ -1,8 +1,6 @@
 package org.slinkyframework.environment.config.maven.plugin.config.templates;
 
 import org.apache.commons.io.DirectoryWalker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slinkyframework.environment.config.maven.plugin.config.EnvironmentConfigException;
 
 import java.io.File;
@@ -12,8 +10,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class TemplateDirectoryWalker extends DirectoryWalker {
-
-    private static Logger LOG = LoggerFactory.getLogger(TemplateDirectoryWalker.class);
 
     private FileGenerator fileGenerator;
 

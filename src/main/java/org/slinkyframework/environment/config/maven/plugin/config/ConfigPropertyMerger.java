@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static java.lang.String.format;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class ConfigPropertyMerger {
 
@@ -35,18 +34,16 @@ public class ConfigPropertyMerger {
     }
 
     private void loadProperties(Properties properties, File file) {
-        FileReader fr = null;
         try {
             if (file.exists()) {
-                fr = new FileReader(file);
-                properties.load(fr);
+                try (FileReader fr = new FileReader(file)) {
+                     properties.load(fr);
+                }
             } else {
                 LOG.debug("WARNING: Properties file '{}' does not exist and will not be loaded", file.getAbsolutePath());
             }
         } catch (IOException e) {
             throw new EnvironmentConfigException(format("Unable to load properties file %s", file), e);
-        } finally {
-            closeQuietly(fr);
         }
 
     }

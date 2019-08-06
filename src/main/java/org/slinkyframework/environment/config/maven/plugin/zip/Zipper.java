@@ -16,8 +16,10 @@ import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
 public class Zipper {
-
     private static final Logger LOG = LoggerFactory.getLogger(Zipper.class);
+
+    private Zipper() {
+    }
 
     public static void zipDirectory(File sourceDir, File outputFile) {
         if (!sourceDir.exists()) {
@@ -26,19 +28,12 @@ public class Zipper {
 
         LOG.debug("Zipping directory {} into {}", sourceDir, outputFile);
 
-        ZipOutputStream zos = null;
-        FileOutputStream fos = null;
-
-        try {
-            fos = new FileOutputStream(outputFile);
-            zos = new ZipOutputStream(fos);
+        try (FileOutputStream fos = new FileOutputStream(outputFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
 
             compressDirectoryToZipfile(sourceDir, sourceDir, zos);
         } catch (IOException e) {
             throw new EnvironmentConfigException(String.format("Error creating Zip file %s from %s", outputFile, sourceDir), e);
-        } finally {
-            closeQuietly(zos);
-            closeQuietly(fos);
         }
     }
 
@@ -62,12 +57,8 @@ public class Zipper {
             if (file.isDirectory()) {
                 compressDirectoryToZipfile(rootDir, new File(sourceDir, file.getName()), zos);
             } else {
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(file);
+                try (FileInputStream fis = new FileInputStream(file)) {
                     copy(fis, zos);
-                } finally {
-                    closeQuietly(fis);
                 }
             }
         }

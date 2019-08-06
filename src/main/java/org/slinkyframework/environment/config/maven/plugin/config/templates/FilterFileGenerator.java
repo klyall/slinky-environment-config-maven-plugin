@@ -10,17 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slinkyframework.environment.config.maven.plugin.config.EnvironmentConfigException;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.LinkedHashSet;
+import java.io.*;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang3.StringUtils.removeEndIgnoreCase;
 
@@ -29,12 +23,11 @@ public class FilterFileGenerator implements FileGenerator {
 
     private File targetDir;
     private Properties properties;
-    private LinkedHashSet<String> delimiters;
-
+    private Set<String> delimiters;
 
     private boolean failOnMissingProperty = false;
 
-    public FilterFileGenerator(File targetDir, Properties properties, LinkedHashSet<String> delimiters) {
+    public FilterFileGenerator(File targetDir, Properties properties, Set<String> delimiters) {
         this.targetDir = targetDir;
         this.properties = properties;
         this.delimiters = delimiters;
@@ -46,9 +39,6 @@ public class FilterFileGenerator implements FileGenerator {
 
     @Override
     public void generateFile(File templateFile) {
-        Reader reader = null;
-        Writer writer = null;
-
         try {
             String subDir = StringUtils.substringAfter(templateFile.getParent(), TemplateApplicationConfigFactory.TEMPLATES_DIR);
             File targetSubDir = new File(targetDir, subDir);
@@ -59,29 +49,23 @@ public class FilterFileGenerator implements FileGenerator {
 
             LOG.debug("Generating config file '{}' using properties {}", targetFile, properties);
 
-            reader = new FileReader(templateFile);
-
             MultiDelimiterStringSearchInterpolator interpolator = new MultiDelimiterStringSearchInterpolator();
             interpolator.addValueSource(createValueSource());
-            delimiters.forEach(d -> interpolator.addDelimiterSpec(d));
+            delimiters.forEach(interpolator::addDelimiterSpec);
 
-            MultiDelimiterInterpolatorFilterReader filteringReader = new MultiDelimiterInterpolatorFilterReader(
-                    reader,
-                    interpolator,
-                    new SimpleRecursionInterceptor()
-            );
-            delimiters.forEach(d -> filteringReader.addDelimiterSpec(d));
-
-            writer = new FileWriter(targetFile);
-
-            copy(filteringReader, writer);
-
-            closeQuietly(filteringReader);
+            try (Reader reader = new FileReader(templateFile);
+                 MultiDelimiterInterpolatorFilterReader filteringReader = new MultiDelimiterInterpolatorFilterReader(
+                         reader,
+                         interpolator,
+                         new SimpleRecursionInterceptor()
+                 );
+                Writer writer = new FileWriter(targetFile);
+            ) {
+                delimiters.forEach(filteringReader::addDelimiterSpec);
+                copy(filteringReader, writer);
+            }
         } catch (IOException e) {
             throw new EnvironmentConfigException("Unable to filter file", e);
-        } finally {
-            closeQuietly(reader);
-            closeQuietly(writer);
         }
     }
 

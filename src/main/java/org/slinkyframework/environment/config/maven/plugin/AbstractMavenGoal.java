@@ -44,7 +44,7 @@ public abstract class AbstractMavenGoal {
     }
 
     private void processEnvironment(File environmentDir) {
-        File[] zipFiles = environmentDir.listFiles((dir, name) -> { return name.toLowerCase().endsWith(".zip"); });
+        File[] zipFiles = environmentDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
         String environmentName = environmentDir.getName();
 
         for (File zipFile: zipFiles) {

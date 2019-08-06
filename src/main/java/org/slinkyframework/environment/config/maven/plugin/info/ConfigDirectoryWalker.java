@@ -8,25 +8,17 @@ import org.slinkyframework.environment.config.maven.plugin.config.EnvironmentCon
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class ConfigDirectoryWalker extends DirectoryWalker {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigDirectoryWalker.class);
 
     private static final String GLOBAL = "global";
-    public static final String APPLICATIONS = "applications";
-    public static final String ENVIRONMENTS = "environments";
+    private static final String APPLICATIONS = "applications";
+    private static final String ENVIRONMENTS = "environments";
 
     private Set<Object> allPropertyNames = new TreeSet<>();
 
@@ -36,11 +28,6 @@ public class ConfigDirectoryWalker extends DirectoryWalker {
     private Map<String, Map<String, Properties>> applicationEnvironmentProperties = new TreeMap<>();
     private String level1;
     private String level2;
-    private int propertyCounter;
-    private int instanceCounter;
-
-    public ConfigDirectoryWalker() {
-    }
 
     public List walk(File startDirectory) {
         List results = new ArrayList();
@@ -106,19 +93,17 @@ public class ConfigDirectoryWalker extends DirectoryWalker {
 
     private Properties loadProperties(File file) {
         Properties properties = new Properties();
-        FileReader fr = null;
+
         try {
             if (file.exists()) {
-                fr = new FileReader(file);
-
-                properties.load(fr);
+                try (FileReader fr = new FileReader(file)) {
+                    properties.load(fr);
+                }
             } else {
                 LOG.debug("WARNING: Properties file '{}' does not exist and will not be loaded", file.getAbsolutePath());
             }
         } catch (IOException e) {
             throw new EnvironmentConfigException(format("Unable to load properties file %s", file), e);
-        } finally {
-            closeQuietly(fr);
         }
 
         return properties;
@@ -134,27 +119,27 @@ public class ConfigDirectoryWalker extends DirectoryWalker {
                 logProperty("GLOBAL", "", "", propertyName, globalProperties.getProperty((String) propertyName));
             }
 
-            for (String applictionName: applicationProperties.keySet()) {
-                Properties properties = applicationProperties.get(applictionName);
+            for (Map.Entry<String, Properties> applicationEntry: applicationProperties.entrySet()) {
+                Properties properties = applicationEntry.getValue();
                 if (properties.containsKey(propertyName)) {
-                    logProperty("APPLICATION", "", applictionName, propertyName, properties.getProperty((String) propertyName));
+                    logProperty("APPLICATION", "", applicationEntry.getKey(), propertyName, properties.getProperty((String) propertyName));
                 }
             }
 
-            for (String environmentName: environmentProperties.keySet()) {
-                Properties properties = environmentProperties.get(environmentName);
+            for (Map.Entry<String, Properties> environmentEntry: environmentProperties.entrySet()) {
+                Properties properties = environmentEntry.getValue();
                 if (properties.containsKey(propertyName)) {
-                    logProperty("ENVIRONMENT", environmentName, "", propertyName, properties.getProperty((String) propertyName));
+                    logProperty("ENVIRONMENT", environmentEntry.getKey(), "", propertyName, properties.getProperty((String) propertyName));
                 }
             }
 
-            for (String environmentName: applicationEnvironmentProperties.keySet()) {
-                Map<String, Properties> environments = applicationEnvironmentProperties.get(environmentName);
+            for (Map.Entry<String, Map<String, Properties>> applicationEnvironmentEntry: applicationEnvironmentProperties.entrySet()) {
+                Map<String, Properties> environments = applicationEnvironmentEntry.getValue();
 
-                for (String applicationName: environments.keySet()) {
-                    Properties properties = environments.get(applicationName);
+                for (Map.Entry<String, Properties> environmentsEntry: environments.entrySet()) {
+                    Properties properties = environmentsEntry.getValue();
                     if (properties.containsKey(propertyName)) {
-                        logProperty("APPL_ENV", environmentName, applicationName, propertyName, properties.getProperty((String) propertyName));
+                        logProperty("APPL_ENV", applicationEnvironmentEntry.getKey(), environmentsEntry.getKey(), propertyName, properties.getProperty((String) propertyName));
                     }
                 }
             }

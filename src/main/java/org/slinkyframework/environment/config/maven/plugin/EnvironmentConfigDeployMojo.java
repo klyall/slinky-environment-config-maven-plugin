@@ -55,10 +55,6 @@ public class EnvironmentConfigDeployMojo extends AbstractMojo {
     private boolean isSnapshot() {
         String version = project.getVersion();
 
-        if (version != null && version.endsWith("SNAPSHOT")) {
-            return true;
-        } else {
-            return false;
-        }
+        return version != null && version.endsWith("SNAPSHOT");
     }
 }

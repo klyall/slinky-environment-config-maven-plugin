@@ -1,15 +1,10 @@
 package org.slinkyframework.environment.config.maven.plugin.zip;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 
 import static org.slinkyframework.environment.config.maven.plugin.zip.Zipper.zipDirectory;
 
 public class ZipFileFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(ZipFileFactory.class);
-
     private File targetDir;
     private String version;
 
