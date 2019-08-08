@@ -16,7 +16,7 @@ public class ZipperIntegrationTest {
     @Test
     public void shouldCreateAZipWithRootFiles() {
 
-        Zipper.zipDirectory(SOURCE_DIR, TARGET_FILE);
+        Zipper.INSTANCE.zipDirectory(SOURCE_DIR, TARGET_FILE);
 
         assertThat(TARGET_FILE, hasEntry("file1.conf"));
     }
@@ -24,7 +24,7 @@ public class ZipperIntegrationTest {
     @Test
     public void shouldCreateAZipWithFileInSubFolder() {
 
-        Zipper.zipDirectory(SOURCE_DIR, TARGET_FILE);
+        Zipper.INSTANCE.zipDirectory(SOURCE_DIR, TARGET_FILE);
 
         assertThat(TARGET_FILE, hasEntry("sub/"));
         assertThat(TARGET_FILE, hasEntry("sub/dir/"));
@@ -36,6 +36,6 @@ public class ZipperIntegrationTest {
 
         File sourceDir = new File("does/not/exist");
 
-        Zipper.zipDirectory(sourceDir, TARGET_FILE);
+        Zipper.INSTANCE.zipDirectory(sourceDir, TARGET_FILE);
     }
 }

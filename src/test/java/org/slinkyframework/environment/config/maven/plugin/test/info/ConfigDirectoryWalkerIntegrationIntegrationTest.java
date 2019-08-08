@@ -20,5 +20,7 @@ public class ConfigDirectoryWalkerIntegrationIntegrationTest {
         List results = directoryWalker.walk(sourceDir);
 
         assertThat(results.size(), is(equalTo(5)));
+        assertThat(directoryWalker.calculateNumberOfPropertiesManaged(), is(equalTo(11)));
+        assertThat(directoryWalker.calculateNumberOfConfigurationLines(), is(equalTo(15)));
     }
 }
