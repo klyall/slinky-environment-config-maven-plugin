@@ -3,14 +3,15 @@ package org.slinkyframework.environment.config.maven.plugin.install
 import org.slinkyframework.environment.config.maven.plugin.AbstractMavenGoal
 
 import java.io.File
+import java.nio.file.Path
 import java.util.Properties
 
-class MavenInstaller(projectDir: File, groupId: String, version: String, targetDir: File) : AbstractMavenGoal(projectDir, groupId, version, targetDir)
+class MavenInstaller(projectDir: Path, groupId: String, version: String, targetDir: Path) : AbstractMavenGoal(projectDir, groupId, version, targetDir)
 {
     override val goal: String
         get() = MAVEN_GOAL
 
-    override fun getAdditionalProperties(zipFile: File): Properties
+    override fun getAdditionalProperties(zipFile: Path): Properties
     {
         return Properties()
     }

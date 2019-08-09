@@ -28,11 +28,11 @@ class EnvironmentConfigDeployMojo : AbstractMojo()
         val mavenDeployer: MavenDeployer =
                 if (repository != null)
                 {
-                    MavenDeployer(project.basedir, project.groupId, project.version, File(targetDir), repository)
+                    MavenDeployer(project.basedir.toPath(), project.groupId, project.version, File(targetDir).toPath(), repository)
                 }
                 else
                 {
-                    MavenDeployer(project.basedir, project.groupId, project.version, File(targetDir))
+                    MavenDeployer(project.basedir.toPath(), project.groupId, project.version, File(targetDir).toPath())
                 }
 
         mavenDeployer.processEnvironments()

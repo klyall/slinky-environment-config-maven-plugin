@@ -8,7 +8,6 @@ import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
 import org.slinkyframework.environment.config.maven.plugin.install.MavenInstaller
-
 import java.io.File
 
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INSTALL)
@@ -23,7 +22,7 @@ class EnvironmentConfigInstallMojo : AbstractMojo()
     @Throws(MojoExecutionException::class, MojoFailureException::class)
     override fun execute()
     {
-        val mavenInstaller = MavenInstaller(project.basedir, project.groupId, project.version, File(targetDir))
+        val mavenInstaller = MavenInstaller(project.basedir.toPath(), project.groupId, project.version, File(targetDir).toPath())
 
         mavenInstaller.processEnvironments()
     }

@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.slinkyframework.environment.config.maven.plugin.install.MavenInstaller;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertThat;
 import static org.slinkyframework.environment.config.maven.plugin.test.matchers.FileExistsMatcher.fileExists;
@@ -14,7 +16,7 @@ public class MavenInstallerIntegrationTest {
 
     private static final String GROUP_ID = "org.slinkyframework.test.environments";
     private static final String VERSION = "1.0.0";
-    private static final File TARGET_DIR = new File("src/test/resources/install-test");
+    private static final Path TARGET_DIR = new File("src/test/resources/install-test").toPath();
     private static final String USER_DIR = System.getProperty("user.home");
     private static final String MAVEN_HOME = "maven.home";
 
@@ -29,7 +31,7 @@ public class MavenInstallerIntegrationTest {
             System.setProperty(MAVEN_HOME, "/usr/local/Cellar/maven/3.6.0/libexec");
         }
 
-        File projectDir = new File("./");
+        Path projectDir = Paths.get(".");
 
         MavenInstaller mavenInstaller = new MavenInstaller(projectDir, GROUP_ID, VERSION, TARGET_DIR);
         mavenInstaller.processEnvironments();
