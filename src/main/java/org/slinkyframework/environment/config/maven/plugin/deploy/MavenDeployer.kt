@@ -1,36 +1,108 @@
 package org.slinkyframework.environment.config.maven.plugin.deploy
 
+import org.apache.maven.artifact.Artifact
+import org.apache.maven.artifact.repository.ArtifactRepository
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
+import org.apache.maven.artifact.repository.MavenArtifactRepository
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
+import org.apache.maven.execution.MavenSession
 import org.apache.maven.model.DeploymentRepository
+import org.apache.maven.plugin.MojoExecutionException
+import org.apache.maven.plugin.MojoFailureException
+import org.apache.maven.project.ProjectBuilder
+import org.apache.maven.shared.transfer.artifact.deploy.ArtifactDeployer
+import org.apache.maven.shared.transfer.artifact.deploy.ArtifactDeployerException
+import org.apache.maven.shared.transfer.repository.RepositoryManager
+import org.codehaus.plexus.util.StringUtils
+import org.slf4j.LoggerFactory
 import org.slinkyframework.environment.config.maven.plugin.AbstractMavenGoal
+import java.io.File
 import java.nio.file.Path
-import java.util.*
 
-class MavenDeployer : AbstractMavenGoal
+class MavenDeployer(projectDir: Path, groupId: String, version: String, targetDir: Path,
+                     private val repository: DeploymentRepository,
+                     session: MavenSession,
+                     projectBuilder: ProjectBuilder,
+                     repositoryManager: RepositoryManager,
+                     private val deployer: ArtifactDeployer
+) : AbstractMavenGoal(
+        projectDir, groupId, version, targetDir, session, projectBuilder, repositoryManager)
 {
-    private val props = Properties()
-
-    constructor(projectDir: Path, groupId: String, version: String, targetDir: Path) : super(projectDir, groupId, version, targetDir)
-    {
-    }
-
-    constructor(projectDir: Path, groupId: String, version: String, targetDir: Path, repository: DeploymentRepository) : super(projectDir, groupId, version, targetDir)
-    {
-        props.setProperty(PROPERTY_REPOSITORY_ID, repository.id)
-        props.setProperty(PROPERTY_URL, repository.url)
-    }
-
     override val goal: String
         get() = MAVEN_GOAL
 
-    override fun getAdditionalProperties(zipFile: Path): Properties
+    override suspend fun execute(groupId: String, artifactId: String, version: String, file: File)
     {
-        return props
+        if (!file.exists())
+        {
+            val message = "The specified file '${file.path}' does not exist"
+            LOG.error(message)
+            throw MojoFailureException(message)
+        }
+
+        val deploymentRepository = createArtifactRepository()
+
+        val project = createMavenProject(groupId, artifactId, version)
+        val artifact = project.artifact
+
+        if (file == getLocalRepoFile(groupId, artifactId, version))
+        {
+            throw MojoFailureException("Cannot deploy artifact from the local repository: $file")
+        }
+
+        val deployableArtifacts = mutableListOf<Artifact>()
+
+        artifact.file = file
+        deployableArtifacts.add(artifact)
+
+        val pom = generatePomFile(groupId, artifactId, version)
+
+        artifact.file = pom
+        deployableArtifacts.add(artifact)
+
+        artifact.repository = deploymentRepository
+
+        val attachedArtifacts = project.attachedArtifacts
+
+        deployableArtifacts.addAll(attachedArtifacts)
+
+        deployFiles(deploymentRepository, deployableArtifacts)
+    }
+
+    private suspend fun deployFiles(deploymentRepository: ArtifactRepository, deployableArtifacts: MutableList<Artifact>)
+    {
+        try
+        {
+            val buildingRequest = session.projectBuildingRequest
+
+            deployer.deploy(buildingRequest, deploymentRepository, deployableArtifacts)
+        }
+        catch (e: ArtifactDeployerException)
+        {
+            throw MojoExecutionException(e.message, e)
+        }
+    }
+
+    private fun createArtifactRepository(): ArtifactRepository
+    {
+        val deploymentRepository = MavenArtifactRepository(
+                repository.id, repository.url, DefaultRepositoryLayout(), ArtifactRepositoryPolicy(), ArtifactRepositoryPolicy())
+
+        LOG.debug("Artifact repository configured for {}:{}", repository.id, repository.url)
+
+        val protocol = deploymentRepository.protocol
+
+        if (StringUtils.isEmpty(protocol))
+        {
+            throw MojoExecutionException("No transfer protocol found.")
+        }
+
+        return deploymentRepository
     }
 
     companion object
     {
-        private const val MAVEN_GOAL = "deploy:deploy-file"
-        private const val PROPERTY_REPOSITORY_ID = "repositoryId"
-        private const val PROPERTY_URL = "url"
+        private const val MAVEN_GOAL = "deploy"
+        private val LOG = LoggerFactory.getLogger(MavenDeployer::class.java)
     }
 }
