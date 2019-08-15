@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.slinkyframework.environment.config.maven.plugin.AbstractMavenGoal
 import java.io.File
 import java.nio.file.Path
+import org.apache.maven.project.artifact.ProjectArtifactMetadata
 
 class MavenDeployer(projectDir: Path, groupId: String, version: String, targetDir: Path,
                      private val repository: DeploymentRepository,
@@ -50,26 +51,21 @@ class MavenDeployer(projectDir: Path, groupId: String, version: String, targetDi
             throw MojoFailureException("Cannot deploy artifact from the local repository: $file")
         }
 
-        val deployableArtifacts = mutableListOf<Artifact>()
-
         artifact.file = file
-        deployableArtifacts.add(artifact)
 
         val pom = generatePomFile(groupId, artifactId, version)
 
-        artifact.file = pom
-        deployableArtifacts.add(artifact)
+        val metadata = ProjectArtifactMetadata(artifact, pom)
+        artifact.addMetadata(metadata)
 
         artifact.repository = deploymentRepository
 
-        val attachedArtifacts = project.attachedArtifacts
-
-        deployableArtifacts.addAll(attachedArtifacts)
+        val deployableArtifacts = listOf<Artifact>(artifact)
 
         deployFiles(deploymentRepository, deployableArtifacts)
     }
 
-    private suspend fun deployFiles(deploymentRepository: ArtifactRepository, deployableArtifacts: MutableList<Artifact>)
+    private fun deployFiles(deploymentRepository: ArtifactRepository, deployableArtifacts: List<Artifact>)
     {
         try
         {
