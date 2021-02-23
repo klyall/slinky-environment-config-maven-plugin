@@ -100,37 +100,50 @@ class ConfigDirectoryWalker : DirectoryWalker<File>() {
         LOG.info("{} {} {} {}={}", format("%-15s", "============="), format("%-20s", "==========="), format("%-30s", "==========="), "===", "=====")
 
         for (propertyName in allPropertyNames.sortedBy { p -> p }) {
-            if (globalProperties.containsKey(propertyName)) {
-                logProperty("GLOBAL", "", "", propertyName, globalProperties[propertyName])
-            }
-
-            for ((key, properties) in applicationProperties) {
-                if (properties.containsKey(propertyName)) {
-                    logProperty("APPLICATION", "", key, propertyName, properties[propertyName])
-                }
-            }
-
-            for ((key, properties) in environmentProperties) {
-                if (properties.containsKey(propertyName)) {
-                    logProperty("ENVIRONMENT", key, "", propertyName, properties[propertyName])
-                }
-            }
-
-            for ((key, environments) in applicationEnvironmentProperties) {
-                for ((key1, properties) in environments) {
-                    if (properties.containsKey(propertyName)) {
-                        logProperty("APPL_ENV", key, key1, propertyName, properties[propertyName])
-                    }
-                }
-            }
+            logGlobalProperties(propertyName)
+            logApplicationProperties(propertyName)
+            logEnvironmentProperties(propertyName)
+            logApplicationEnvironmentProperties(propertyName)
         }
 
         LOG.info("Number of unique properties   : {}", format("%,7d", calculateNumberOfPropertiesManaged()))
         LOG.info("Number of configuration lines : {}", format("%,7d", calculateNumberOfConfigurationLines()))
     }
 
+    private fun logGlobalProperties(propertyName: String) {
+        if (globalProperties.containsKey(propertyName)) {
+            logProperty("GLOBAL", "", "", propertyName, globalProperties[propertyName])
+        }
+    }
+
     private fun logProperty(propertyType: String, environmentName: String, applicationName: String, propertyName: Any, value: String?) {
         LOG.info("{} {} {} {}={}", format("%-15s", propertyType), format("%-20s", environmentName), format("%-30s", applicationName), propertyName, value)
+    }
+
+    private fun logApplicationProperties(propertyName: String) {
+        for ((key, properties) in applicationProperties) {
+            if (properties.containsKey(propertyName)) {
+                logProperty("APPLICATION", "", key, propertyName, properties[propertyName])
+            }
+        }
+    }
+
+    private fun logEnvironmentProperties(propertyName: String) {
+        for ((key, properties) in environmentProperties) {
+            if (properties.containsKey(propertyName)) {
+                logProperty("ENVIRONMENT", key, "", propertyName, properties[propertyName])
+            }
+        }
+    }
+
+    private fun logApplicationEnvironmentProperties(propertyName: String) {
+        for ((key, environments) in applicationEnvironmentProperties) {
+            for ((key1, properties) in environments) {
+                if (properties.containsKey(propertyName)) {
+                    logProperty("APPL_ENV", key, key1, propertyName, properties[propertyName])
+                }
+            }
+        }
     }
 
     fun calculateNumberOfPropertiesManaged(): Int {
