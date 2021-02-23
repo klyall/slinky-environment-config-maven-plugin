@@ -15,19 +15,16 @@ import java.io.File
 import java.nio.file.Path
 
 class MavenInstaller(projectDir: Path, groupId: String, version: String, targetDir: Path,
-                      session: MavenSession,
-                      projectBuilder: ProjectBuilder,
-                      repositoryManager: RepositoryManager,
-                      private val installer: ProjectInstaller
-) : AbstractMavenGoal(projectDir, groupId, version, targetDir, session, projectBuilder, repositoryManager)
-{
+                     session: MavenSession,
+                     projectBuilder: ProjectBuilder,
+                     repositoryManager: RepositoryManager,
+                     private val installer: ProjectInstaller
+) : AbstractMavenGoal(projectDir, groupId, version, targetDir, session, projectBuilder, repositoryManager) {
     override val goal: String
         get() = MAVEN_GOAL
 
-    override suspend fun execute(groupId: String, artifactId: String, version: String, file: File)
-    {
-        if (!file.exists())
-        {
+    override suspend fun execute(groupId: String, artifactId: String, version: String, file: File) {
+        if (!file.exists()) {
             val message = "The specified file '${file.path}' does not exist"
             LOG.error(message)
             throw MojoFailureException(message)
@@ -40,13 +37,12 @@ class MavenInstaller(projectDir: Path, groupId: String, version: String, targetD
         // the extension will be set to the packaging type
         // which is sometimes wrong.
         val ah = DefaultArtifactHandler(PACKAGING)
-        ah.extension = FileUtils.getExtension(file.getName())
+        ah.extension = FileUtils.getExtension(file.name)
 
         project.artifact.artifactHandler = ah
         val artifact = project.artifact
 
-        if (file == getLocalRepoFile(groupId, artifactId, version))
-        {
+        if (file == getLocalRepoFile(groupId, artifactId, version)) {
             throw MojoFailureException("Cannot install artifact. "
                     + "Artifact is already in the local repository.\n\nFile in question is: " + file + "\n")
         }
@@ -59,25 +55,19 @@ class MavenInstaller(projectDir: Path, groupId: String, version: String, targetD
 
         project.file = temporaryPom
 
-        try
-        {
+        try {
             val projectInstallerRequest = ProjectInstallerRequest().setProject(project)
             val buildingRequest = session.projectBuildingRequest
 
             installer.install(buildingRequest, projectInstallerRequest)
-        }
-        catch (e: Exception)
-        {
+        } catch (e: Exception) {
             throw MojoExecutionException(e.message, e)
-        }
-        finally
-        {
+        } finally {
             temporaryPom.delete()
         }
     }
 
-    companion object
-    {
+    companion object {
         private const val MAVEN_GOAL = "install"
         private val LOG = LoggerFactory.getLogger(MavenInstaller::class.java)
     }

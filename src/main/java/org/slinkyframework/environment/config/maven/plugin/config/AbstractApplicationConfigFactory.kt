@@ -4,12 +4,10 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileFilter
 
-abstract class AbstractApplicationConfigFactory(protected val baseDir: File, protected var targetDir: File) : ConfigFileFactory
-{
+abstract class AbstractApplicationConfigFactory(protected val baseDir: File, protected var targetDir: File) : ConfigFileFactory {
     protected abstract fun processDirectory(application: String, environment: String, sourceDir: File, targetDir: File)
 
-    override fun generateFiles()
-    {
+    override fun generateFiles() {
         val applications = findApplications()
         val environments = findEnvironments()
 
@@ -21,32 +19,26 @@ abstract class AbstractApplicationConfigFactory(protected val baseDir: File, pro
         processApplicationEnvironmentFiles(applications, environments)
     }
 
-    private fun findApplications(): List<File>
-    {
+    private fun findApplications(): List<File> {
         return listDirectories(APPLICATIONS_DIR)
     }
 
-    private fun findEnvironments(): List<File>
-    {
+    private fun findEnvironments(): List<File> {
         return listDirectories(ENVIRONMENTS_DIR)
     }
 
-    private fun listDirectories(dir: String): List<File>
-    {
+    private fun listDirectories(dir: String): List<File> {
         val directory = File(baseDir, dir)
         val directories = directory.listFiles(FileFilter { it.isDirectory })
 
         return directories?.asList() ?: NO_FILES
     }
 
-    private fun processApplicationFiles(applications: List<File>, environments: List<File>)
-    {
+    private fun processApplicationFiles(applications: List<File>, environments: List<File>) {
         LOG.debug("Processing application config files")
 
-        for (application in applications)
-        {
-            for (environment in environments)
-            {
+        for (application in applications) {
+            for (environment in environments) {
                 val targetEnvironmentDir = File(targetDir, environment.name)
                 val targetApplicationDir = File(targetEnvironmentDir, application.name)
 
@@ -55,14 +47,11 @@ abstract class AbstractApplicationConfigFactory(protected val baseDir: File, pro
         }
     }
 
-    private fun processApplicationEnvironmentFiles(applications: List<File>, environments: List<File>)
-    {
+    private fun processApplicationEnvironmentFiles(applications: List<File>, environments: List<File>) {
         LOG.debug("Processing application/environment config files")
 
-        for (environment in environments)
-        {
-            for (application in applications)
-            {
+        for (environment in environments) {
+            for (application in applications) {
 
                 val applicationDir = File(environment, APPLICATIONS_DIR)
                 val applicationEnvironmentDir = File(applicationDir, application.name)
@@ -75,14 +64,11 @@ abstract class AbstractApplicationConfigFactory(protected val baseDir: File, pro
         }
     }
 
-    private fun processEnvironmentFiles(applications: List<File>, environments: List<File>)
-    {
+    private fun processEnvironmentFiles(applications: List<File>, environments: List<File>) {
         LOG.debug("Processing environment config files")
 
-        for (environment in environments)
-        {
-            for (application in applications)
-            {
+        for (environment in environments) {
+            for (application in applications) {
                 val targetEnvironmentDir = File(targetDir, environment.name)
                 val targetApplicationDir = File(targetEnvironmentDir, application.name)
 
@@ -91,16 +77,13 @@ abstract class AbstractApplicationConfigFactory(protected val baseDir: File, pro
         }
     }
 
-    private fun processGlobalFilesToAll(applications: List<File>, environments: List<File>)
-    {
+    private fun processGlobalFilesToAll(applications: List<File>, environments: List<File>) {
         LOG.debug("Processing global config files")
 
         val globalDir = File(baseDir, GLOBAL_DIR)
 
-        for (application in applications)
-        {
-            for (environment in environments)
-            {
+        for (application in applications) {
+            for (environment in environments) {
                 val targetEnvironmentDir = File(targetDir, environment.name)
                 val targetApplicationDir = File(targetEnvironmentDir, application.name)
 
@@ -109,8 +92,7 @@ abstract class AbstractApplicationConfigFactory(protected val baseDir: File, pro
         }
     }
 
-    companion object
-    {
+    companion object {
         private val LOG = LoggerFactory.getLogger(AbstractApplicationConfigFactory::class.java)
         private val NO_FILES = listOf<File>()
 

@@ -14,8 +14,7 @@ import java.io.File
 
 @Mojo(name = "package", defaultPhase = LifecyclePhase.PACKAGE)
 @Execute(goal = "package", phase = LifecyclePhase.PACKAGE)
-class EnvironmentConfigPackageMojo : AbstractMojo()
-{
+class EnvironmentConfigPackageMojo : AbstractMojo() {
     @Parameter(property = "config.targetDir", defaultValue = "\${project.build.directory}/generated-config", readonly = true)
     private lateinit var targetDir: String
 
@@ -23,8 +22,7 @@ class EnvironmentConfigPackageMojo : AbstractMojo()
     private lateinit var project: MavenProject
 
     @Throws(MojoExecutionException::class, MojoFailureException::class)
-    override fun execute()
-    {
+    override fun execute() {
         val zipFileFactory = ZipFileFactory(File(targetDir), project.version)
 
         zipFileFactory.createZipFiles()

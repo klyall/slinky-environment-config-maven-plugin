@@ -1,36 +1,32 @@
 package org.slinkyframework.environment.config.maven.plugin.config.templates
 
+import org.apache.commons.io.FileUtils.forceMkdir
+import org.apache.commons.io.IOUtils.copy
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.StringUtils.removeEndIgnoreCase
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource
 import org.codehaus.plexus.interpolation.SimpleRecursionInterceptor
 import org.codehaus.plexus.interpolation.ValueSource
 import org.codehaus.plexus.interpolation.multi.MultiDelimiterInterpolatorFilterReader
 import org.codehaus.plexus.interpolation.multi.MultiDelimiterStringSearchInterpolator
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slinkyframework.environment.config.maven.plugin.config.EnvironmentConfigException
-
-import java.io.*
-import java.util.Properties
-
-import org.apache.commons.io.FileUtils.forceMkdir
-import org.apache.commons.io.IOUtils.copy
-import org.apache.commons.lang3.StringUtils.removeEndIgnoreCase
+import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
+import java.util.*
 import java.util.function.Consumer
 
-class FilterFileGenerator(private val targetDir: File, private val properties: Properties, private val delimiters: Set<String>) : FileGenerator
-{
+class FilterFileGenerator(private val targetDir: File, private val properties: Properties, private val delimiters: Set<String>) : FileGenerator {
     private var failOnMissingProperty = false
 
-    fun setFailOnMissingProperty(failOnMissingProperty: Boolean)
-    {
+    fun setFailOnMissingProperty(failOnMissingProperty: Boolean) {
         this.failOnMissingProperty = failOnMissingProperty
     }
 
-    override fun generateFile(templateFile: File)
-    {
-        try
-        {
+    override fun generateFile(templateFile: File) {
+        try {
             val subDir = StringUtils.substringAfter(templateFile.parent, TemplateApplicationConfigFactory.TEMPLATES_DIR)
             val targetSubDir = File(targetDir, subDir)
 
@@ -58,27 +54,21 @@ class FilterFileGenerator(private val targetDir: File, private val properties: P
                     }
                 }
             }
-        }
-        catch (e: IOException)
-        {
+        } catch (e: IOException) {
             throw EnvironmentConfigException("Unable to filter file", e)
         }
 
     }
 
-    private fun createValueSource(): ValueSource
-    {
-        return if (failOnMissingProperty)
-        {
+    private fun createValueSource(): ValueSource {
+        return if (failOnMissingProperty) {
             ManadatoryValueSource(PropertiesBasedValueSource(properties))
-        } else
-        {
+        } else {
             LoggingValueSource(PropertiesBasedValueSource(properties))
         }
     }
 
-    companion object
-    {
+    companion object {
         private val LOG = LoggerFactory.getLogger(FilterFileGenerator::class.java)
     }
 }

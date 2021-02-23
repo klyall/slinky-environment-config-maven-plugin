@@ -7,20 +7,17 @@ import java.io.IOException
 import java.lang.String.format
 import java.util.*
 
-class ConfigPropertyMerger(sourceDir: File, application: String, environment: String)
-{
+class ConfigPropertyMerger(sourceDir: File, application: String, environment: String) {
     var properties = Properties()
         internal set
 
-    init
-    {
+    init {
         val globalFile = File(sourceDir, "/global/global.properties")
         val applicationFile = File(sourceDir, format("applications/%s/application.properties", application))
         val environmentFile = File(sourceDir, format("environments/%s/environment.properties", environment))
         val appEnvFile = File(sourceDir, format("environments/%s/applications/%s/application.properties", environment, application))
 
-        if (LOG.isDebugEnabled)
-        {
+        if (LOG.isDebugEnabled) {
             logLoadingOfConfigFiles(globalFile, applicationFile, environmentFile, appEnvFile)
         }
 
@@ -30,40 +27,30 @@ class ConfigPropertyMerger(sourceDir: File, application: String, environment: St
         loadProperties(properties, appEnvFile)
     }
 
-    private fun loadProperties(properties: Properties, file: File)
-    {
-        try
-        {
-            if (file.exists())
-            {
+    private fun loadProperties(properties: Properties, file: File) {
+        try {
+            if (file.exists()) {
                 FileReader(file).use { fr -> properties.load(fr) }
-            }
-            else
-            {
+            } else {
                 LOG.debug("WARNING: Properties file '{}' does not exist and will not be loaded", file.absolutePath)
             }
-        }
-        catch (e: IOException)
-        {
+        } catch (e: IOException) {
             throw EnvironmentConfigException(format("Unable to load properties file %s", file), e)
         }
     }
 
-    private fun logLoadingOfConfigFiles(globalFile: File, applicationFile: File, environmentFile: File, appEnvFile: File)
-    {
+    private fun logLoadingOfConfigFiles(globalFile: File, applicationFile: File, environmentFile: File, appEnvFile: File) {
         logFile("global", globalFile)
         logFile("application", applicationFile)
         logFile("environment", environmentFile)
         logFile("application environment", appEnvFile)
     }
 
-    private fun logFile(configType: String, file: File)
-    {
+    private fun logFile(configType: String, file: File) {
         LOG.debug("Loading {} config file '{}'", configType, file)
     }
 
-    companion object
-    {
+    companion object {
         private val LOG = LoggerFactory.getLogger(ConfigPropertyMerger::class.java)
     }
 }

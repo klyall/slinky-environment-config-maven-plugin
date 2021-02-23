@@ -17,8 +17,7 @@ import org.slinkyframework.environment.config.maven.plugin.deploy.MavenDeployer
 import java.io.File
 
 @Mojo(name = "deploy", defaultPhase = LifecyclePhase.DEPLOY)
-class EnvironmentConfigDeployMojo : AbstractMojo()
-{
+class EnvironmentConfigDeployMojo : AbstractMojo() {
     @Parameter(property = "config.targetDir", defaultValue = "${project.build.directory}/generated-config", readonly = true)
     private lateinit var targetDir: String
 
@@ -45,8 +44,7 @@ class EnvironmentConfigDeployMojo : AbstractMojo()
 
 
     @Throws(MojoExecutionException::class, MojoFailureException::class)
-    override fun execute()
-    {
+    override fun execute() {
         failIfOffline()
 
         val repository = deploymentRepository()
@@ -58,28 +56,21 @@ class EnvironmentConfigDeployMojo : AbstractMojo()
         mavenDeployer.processEnvironments()
     }
 
-    private fun failIfOffline()
-    {
-        if (offline)
-        {
+    private fun failIfOffline() {
+        if (offline) {
             throw MojoFailureException("Cannot deploy artifacts when Maven is in offline mode")
         }
     }
 
-    private fun deploymentRepository(): DeploymentRepository
-    {
-        return if (isSnapshot())
-        {
+    private fun deploymentRepository(): DeploymentRepository {
+        return if (isSnapshot()) {
             project.distributionManagement.snapshotRepository
-        }
-        else
-        {
+        } else {
             project.distributionManagement.repository
         }
     }
 
-    private fun isSnapshot(): Boolean
-    {
+    private fun isSnapshot(): Boolean {
         val version = project.version
 
         return version != null && version.endsWith("SNAPSHOT")

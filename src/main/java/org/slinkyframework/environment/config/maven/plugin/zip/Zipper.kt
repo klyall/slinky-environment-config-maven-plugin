@@ -11,48 +11,39 @@ import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-object Zipper
-{
+object Zipper {
     private val LOG = LoggerFactory.getLogger(Zipper::class.java)
 
-    fun zipDirectory(sourceDir: File, outputFile: File)
-    {
-        if (!sourceDir.exists())
-        {
+    fun zipDirectory(sourceDir: File, outputFile: File) {
+        if (!sourceDir.exists()) {
             throw IllegalArgumentException("Directory does not exist: $sourceDir")
         }
 
         LOG.debug("Zipping directory {} into {}", sourceDir, outputFile)
 
-        try
-        {
+        try {
             FileOutputStream(outputFile).use { fos ->
                 ZipOutputStream(fos).use { zos ->
 
                     compressDirectoryToZipfile(sourceDir, sourceDir, zos)
                 }
             }
-        }
-        catch (e: IOException)
-        {
+        } catch (e: IOException) {
             throw EnvironmentConfigException(String.format("Error creating Zip file %s from %s", outputFile, sourceDir), e)
         }
 
     }
 
     @Throws(IOException::class)
-    private fun compressDirectoryToZipfile(rootDir: File, sourceDir: File, zos: ZipOutputStream)
-    {
-        for (file in sourceDir.listFiles()!!)
-        {
+    private fun compressDirectoryToZipfile(rootDir: File, sourceDir: File, zos: ZipOutputStream) {
+        for (file in sourceDir.listFiles()!!) {
 
             val sb = StringBuilder()
             sb.append(removeStart(sourceDir.absolutePath.replace(rootDir.absolutePath, ""), "/"))
             sb.append("/")
             sb.append(file.name)
 
-            if (file.isDirectory)
-            {
+            if (file.isDirectory) {
                 sb.append("/")
             }
 
@@ -61,12 +52,9 @@ object Zipper
             val entry = ZipEntry(name)
             zos.putNextEntry(entry)
 
-            if (file.isDirectory)
-            {
+            if (file.isDirectory) {
                 compressDirectoryToZipfile(rootDir, File(sourceDir, file.name), zos)
-            }
-            else
-            {
+            } else {
                 FileInputStream(file).use { fis -> copy(fis, zos) }
             }
         }

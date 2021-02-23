@@ -14,8 +14,7 @@ import java.io.File
 
 @Mojo(name = "merge", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 @Execute(goal = "merge", phase = LifecyclePhase.GENERATE_RESOURCES)
-class EnvironmentConfigMergeMojo : AbstractMojo()
-{
+class EnvironmentConfigMergeMojo : AbstractMojo() {
     @Parameter(property = "config.sourceDir", defaultValue = "\${project.basedir}/src/main/resources", readonly = true)
     private lateinit var sourceDir: String
 
@@ -51,10 +50,8 @@ class EnvironmentConfigMergeMojo : AbstractMojo()
     private val failOnMissingProperty: Boolean = false
 
     @Throws(MojoExecutionException::class, MojoFailureException::class)
-    override fun execute()
-    {
-        if (delimiters == null || delimiters!!.isEmpty())
-        {
+    override fun execute() {
+        if (delimiters == null || delimiters!!.isEmpty()) {
             delimiters = setOf(DEFAULT_DELIMITER)
         }
 
@@ -66,8 +63,7 @@ class EnvironmentConfigMergeMojo : AbstractMojo()
         configFileFactory.generateFiles()
     }
 
-    companion object
-    {
+    companion object {
         private const val DEFAULT_DELIMITER = "\${*}"
     }
 }

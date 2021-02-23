@@ -33,22 +33,19 @@ abstract class AbstractMavenGoal(
         protected val session: MavenSession,
         private val projectBuilder: ProjectBuilder,
         private val repositoryManager: RepositoryManager
-)
-{
+) {
     abstract val goal: String
 
     abstract suspend fun execute(groupId: String, artifactId: String, version: String, file: File)
 
-    fun processEnvironments()
-    {
+    fun processEnvironments() {
         Files.list(targetDir)
                 .filter { Files.isDirectory(it) }
                 .sorted { o1, o2 -> o1.fileName.compareTo(o2.fileName) }
                 .forEach { processEnvironment(it) }
     }
 
-    private fun processEnvironment(environmentDir: Path)
-    {
+    private fun processEnvironment(environmentDir: Path) {
         runBlocking {
             val environmentName = environmentDir.toFile().name
 
@@ -61,8 +58,7 @@ abstract class AbstractMavenGoal(
         }
     }
 
-    private suspend fun executeMavenGoal(zipFile: Path, environmentName: String, goal: String): Boolean
-    {
+    private suspend fun executeMavenGoal(zipFile: Path, environmentName: String, goal: String): Boolean {
         val environmentGroupId = "$groupId.$environmentName"
         val extension = "-$version.zip"
         val artifactId = zipFile.toFile().name.replace(extension, "")
@@ -76,8 +72,7 @@ abstract class AbstractMavenGoal(
         return true
     }
 
-    protected fun createMavenProject(groupId: String, artifactId: String, version: String): MavenProject
-    {
+    protected fun createMavenProject(groupId: String, artifactId: String, version: String): MavenProject {
         val modelSource = StringModelSource(
                 "<project><modelVersion>4.0.0</modelVersion>" +
                         "<groupId>$groupId</groupId>" +
@@ -88,22 +83,17 @@ abstract class AbstractMavenGoal(
         val pbr = DefaultProjectBuildingRequest(session.projectBuildingRequest)
         pbr.isProcessPlugins = false
 
-        try
-        {
+        try {
             return projectBuilder.build(modelSource, pbr).project
-        }
-        catch (e: ProjectBuildingException)
-        {
-            if (e.cause is ModelBuildingException)
-            {
+        } catch (e: ProjectBuildingException) {
+            if (e.cause is ModelBuildingException) {
                 throw MojoExecutionException("The artifact information is not valid:${Os.LINE_SEP}${(e.cause as ModelBuildingException).message}")
             }
             throw MojoFailureException("Unable to create the project.", e)
         }
     }
 
-    protected fun getLocalRepoFile(groupId: String, artifactId: String, version: String): File
-    {
+    protected fun getLocalRepoFile(groupId: String, artifactId: String, version: String): File {
         val coordinate = DefaultArtifactCoordinate()
         coordinate.groupId = groupId
         coordinate.artifactId = artifactId
@@ -112,8 +102,7 @@ abstract class AbstractMavenGoal(
         return File(repositoryManager.getLocalRepositoryBasedir(session.projectBuildingRequest), path)
     }
 
-    protected fun generatePomFile(groupId: String, artifactId: String, version: String): File
-    {
+    protected fun generatePomFile(groupId: String, artifactId: String, version: String): File {
         val model = generateModel(groupId, artifactId, version)
 
         val pomFile = File.createTempFile("mvn$goal", ".pom")
@@ -122,8 +111,7 @@ abstract class AbstractMavenGoal(
         return pomFile
     }
 
-    private fun generateModel(groupId: String, artifactId: String, version: String): Model
-    {
+    private fun generateModel(groupId: String, artifactId: String, version: String): Model {
         val model = Model()
 
         model.modelVersion = "4.0.0"
@@ -138,8 +126,7 @@ abstract class AbstractMavenGoal(
         return model
     }
 
-    companion object
-    {
+    companion object {
         const val PACKAGING = "zip"
         private val LOG = LoggerFactory.getLogger(FilterFileGenerator::class.java)
     }

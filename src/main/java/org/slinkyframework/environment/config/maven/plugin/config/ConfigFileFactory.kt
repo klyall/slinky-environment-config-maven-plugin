@@ -1,6 +1,5 @@
 package org.slinkyframework.environment.config.maven.plugin.config
 
-interface ConfigFileFactory
-{
+interface ConfigFileFactory {
     fun generateFiles()
 }
