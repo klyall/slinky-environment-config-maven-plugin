@@ -1,32 +1,28 @@
-package org.slinkyframework.environment.config.maven.plugin.test.matchers;
+package org.slinkyframework.environment.config.maven.plugin.test.matchers
 
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
+import java.io.File
 
-import java.io.File;
+class FileDoesNotExistMatcher private constructor() : TypeSafeMatcher<File>() {
 
-public class FileDoesNotExistMatcher extends TypeSafeMatcher<File> {
-
-    private FileDoesNotExistMatcher() {
+    override fun matchesSafely(file: File): Boolean {
+        return !file.exists()
     }
 
-    @Override
-    protected boolean matchesSafely(File file) {
-        return !file.exists();
+    override fun describeTo(description: Description) {
+        description.appendText("File should not exist")
     }
 
-    @Override
-    public void describeTo(Description description) {
-        description.appendText("File should not exist");
+    override fun describeMismatchSafely(file: File, description: Description) {
+        description.appendText("File exists: ")
+        description.appendValue(file)
     }
 
-    @Override
-    protected void describeMismatchSafely(File file, Description description) {
-        description.appendText("File exists: ");
-        description.appendValue(file);
-    }
-
-    public static FileDoesNotExistMatcher fileDoesNotExist() {
-        return new FileDoesNotExistMatcher();
+    companion object {
+        @JvmStatic
+        fun fileDoesNotExist(): FileDoesNotExistMatcher {
+            return FileDoesNotExistMatcher()
+        }
     }
 }

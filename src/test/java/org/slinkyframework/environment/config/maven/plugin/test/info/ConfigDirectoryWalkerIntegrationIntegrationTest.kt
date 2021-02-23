@@ -1,26 +1,22 @@
-package org.slinkyframework.environment.config.maven.plugin.test.info;
+package org.slinkyframework.environment.config.maven.plugin.test.info
 
-import org.junit.Test;
-import org.slinkyframework.environment.config.maven.plugin.info.ConfigDirectoryWalker;
+import org.hamcrest.Matchers
+import org.junit.Assert
+import org.junit.Test
+import org.slinkyframework.environment.config.maven.plugin.info.ConfigDirectoryWalker
+import java.io.File
 
-import java.io.File;
-import java.util.List;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
-public class ConfigDirectoryWalkerIntegrationIntegrationTest {
+class ConfigDirectoryWalkerIntegrationIntegrationTest {
 
     @Test
-    public void shouldFindPropertyFiles() {
-        File sourceDir = new File("src/test/resources");
+    fun shouldFindPropertyFiles() {
+        val sourceDir = File("src/test/resources")
+        val directoryWalker = ConfigDirectoryWalker()
 
-        ConfigDirectoryWalker directoryWalker = new ConfigDirectoryWalker();
-        List results = directoryWalker.walk(sourceDir);
+        val results: List<*> = directoryWalker.walk(sourceDir)
 
-        assertThat(results.size(), is(equalTo(5)));
-        assertThat(directoryWalker.calculateNumberOfPropertiesManaged(), is(equalTo(11)));
-        assertThat(directoryWalker.calculateNumberOfConfigurationLines(), is(equalTo(15)));
+        Assert.assertThat(results.size, Matchers.`is`(Matchers.equalTo(5)))
+        Assert.assertThat(directoryWalker.calculateNumberOfPropertiesManaged(), Matchers.`is`(Matchers.equalTo(11)))
+        Assert.assertThat(directoryWalker.calculateNumberOfConfigurationLines(), Matchers.`is`(Matchers.equalTo(15)))
     }
 }

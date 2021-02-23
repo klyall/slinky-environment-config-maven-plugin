@@ -1,63 +1,53 @@
-package org.slinkyframework.environment.config.maven.plugin.test.matchers;
+package org.slinkyframework.environment.config.maven.plugin.test.matchers
 
-import org.apache.commons.io.FileUtils;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.apache.commons.io.FileUtils
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
+import java.io.File
+import java.io.IOException
+import java.nio.charset.Charset
+import java.util.zip.ZipFile
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.zip.ZipFile;
+class ZipHasEntryMatcher private constructor(private val entry: String) : TypeSafeMatcher<File>() {
 
-
-public class ZipHasEntryMatcher extends TypeSafeMatcher<File> {
-
-    private String entry;
-
-    private ZipHasEntryMatcher(String entry) {
-        this.entry = entry;
-    }
-
-    @Override
-    protected boolean matchesSafely(File file) {
-        if (file.exists()) {
-            ZipFile zipFile = null;
+    override fun matchesSafely(file: File): Boolean {
+        return if (file.exists()) {
             try {
-                zipFile = new ZipFile(file);
-                return (zipFile.getEntry(entry) != null);
-            } catch (IOException e) {
-                return false;
+                val zipFile = ZipFile(file)
+                zipFile.getEntry(entry) != null
+            } catch (e: IOException) {
+                false
             }
-        }
-        return false;
-    }
-
-    @Override
-    public void describeTo(Description description) {
-        description.appendText(String.format("ZipFile should have entry "));
-        description.appendValue(entry);
-    }
-
-    @Override
-    protected void describeMismatchSafely(File file, Description description) {
-        if (file.exists()) {
-            String contents = readFile(file);
-
-            description.appendText("does not exists");
         } else {
-            description.appendText(String.format("ZipFile '%s' does not exist", file));
+            false
         }
     }
 
-    private String readFile(File file) {
-        try {
-            return FileUtils.readFileToString(file, Charset.defaultCharset());
-        } catch (IOException e) {
-            return "";
+    override fun describeTo(description: Description) {
+        description.appendText(String.format("ZipFile should have entry "))
+        description.appendValue(entry)
+    }
+
+    override fun describeMismatchSafely(file: File, description: Description) {
+        if (file.exists()) {
+            val contents = readFile(file)
+            description.appendText("does not exists")
+        } else {
+            description.appendText(String.format("ZipFile '%s' does not exist", file))
         }
     }
 
-    public static ZipHasEntryMatcher hasEntry(String valueMatcher) {
-        return new ZipHasEntryMatcher(valueMatcher);
+    private fun readFile(file: File): String {
+        return try {
+            FileUtils.readFileToString(file, Charset.defaultCharset())
+        } catch (e: IOException) {
+            ""
+        }
+    }
+
+    companion object {
+        fun hasEntry(valueMatcher: String): ZipHasEntryMatcher {
+            return ZipHasEntryMatcher(valueMatcher)
+        }
     }
 }

@@ -1,41 +1,38 @@
-package org.slinkyframework.environment.config.maven.plugin.test.zip;
+package org.slinkyframework.environment.config.maven.plugin.test.zip
 
-import org.junit.Test;
-import org.slinkyframework.environment.config.maven.plugin.zip.Zipper;
+import org.junit.Assert
+import org.junit.Test
+import org.slinkyframework.environment.config.maven.plugin.test.matchers.ZipHasEntryMatcher
+import org.slinkyframework.environment.config.maven.plugin.zip.Zipper.zipDirectory
+import java.io.File
 
-import java.io.File;
-
-import static org.junit.Assert.assertThat;
-import static org.slinkyframework.environment.config.maven.plugin.test.matchers.ZipHasEntryMatcher.hasEntry;
-
-public class ZipperIntegrationTest {
-
-    private static final File SOURCE_DIR = new File("src/test/resources/zipper-test");
-    private static final File TARGET_FILE = new File("target/zipper-test.zip");
+class ZipperIntegrationTest {
 
     @Test
-    public void shouldCreateAZipWithRootFiles() {
+    fun shouldCreateAZipWithRootFiles() {
+        zipDirectory(SOURCE_DIR, TARGET_FILE)
 
-        Zipper.INSTANCE.zipDirectory(SOURCE_DIR, TARGET_FILE);
-
-        assertThat(TARGET_FILE, hasEntry("file1.conf"));
+        Assert.assertThat(TARGET_FILE, ZipHasEntryMatcher.hasEntry("file1.conf"))
     }
 
     @Test
-    public void shouldCreateAZipWithFileInSubFolder() {
+    fun shouldCreateAZipWithFileInSubFolder() {
+        zipDirectory(SOURCE_DIR, TARGET_FILE)
 
-        Zipper.INSTANCE.zipDirectory(SOURCE_DIR, TARGET_FILE);
-
-        assertThat(TARGET_FILE, hasEntry("sub/"));
-        assertThat(TARGET_FILE, hasEntry("sub/dir/"));
-        assertThat(TARGET_FILE, hasEntry("sub/dir/file2.conf"));
+        Assert.assertThat(TARGET_FILE, ZipHasEntryMatcher.hasEntry("sub/"))
+        Assert.assertThat(TARGET_FILE, ZipHasEntryMatcher.hasEntry("sub/dir/"))
+        Assert.assertThat(TARGET_FILE, ZipHasEntryMatcher.hasEntry("sub/dir/file2.conf"))
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shoudlThrowAnExceptionIfSourceDirDoesNotExist() {
+    @Test(expected = IllegalArgumentException::class)
+    fun shoudlThrowAnExceptionIfSourceDirDoesNotExist() {
+        val sourceDir = File("does/not/exist")
 
-        File sourceDir = new File("does/not/exist");
+        zipDirectory(sourceDir, TARGET_FILE)
+    }
 
-        Zipper.INSTANCE.zipDirectory(sourceDir, TARGET_FILE);
+    companion object {
+        private val SOURCE_DIR = File("src/test/resources/zipper-test")
+        private val TARGET_FILE = File("target/zipper-test.zip")
     }
 }

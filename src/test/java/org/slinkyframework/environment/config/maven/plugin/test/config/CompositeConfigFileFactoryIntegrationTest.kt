@@ -1,44 +1,45 @@
-package org.slinkyframework.environment.config.maven.plugin.test.config;
+package org.slinkyframework.environment.config.maven.plugin.test.config
 
-import org.junit.Before;
-import org.junit.Test;
-import org.slinkyframework.environment.config.maven.plugin.config.CompositeConfigFileFactory;
-import org.slinkyframework.environment.config.maven.plugin.config.ConfigFileFactory;
-import org.slinkyframework.environment.config.maven.plugin.config.files.FileApplicationConfigFactory;
-import org.slinkyframework.environment.config.maven.plugin.config.templates.TemplateApplicationConfigFactory;
+import org.hamcrest.CoreMatchers
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+import org.slinkyframework.environment.config.maven.plugin.config.CompositeConfigFileFactory
+import org.slinkyframework.environment.config.maven.plugin.config.ConfigFileFactory
+import org.slinkyframework.environment.config.maven.plugin.config.files.FileApplicationConfigFactory
+import org.slinkyframework.environment.config.maven.plugin.config.templates.TemplateApplicationConfigFactory
+import org.slinkyframework.environment.config.maven.plugin.test.matchers.FileHasPropertyMatcher.Companion.hasProperty
+import java.io.File
+import java.util.*
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedHashSet;
+class CompositeConfigFileFactoryIntegrationTest {
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.slinkyframework.environment.config.maven.plugin.test.matchers.FileHasPropertyMatcher.hasProperty;
-
-public class CompositeConfigFileFactoryIntegrationTest {
-
-    public static final File TARGET_DIR = new File("target/generated-config/");
-    public static final File SOURCE_DIR = new File("src/test/resources");
-
-    private LinkedHashSet<String> delimiters = new LinkedHashSet<>();
+    private val delimiters = LinkedHashSet<String>()
 
     @Before
-    public void setUp() throws IOException {
-        delimiters.add("{{*}}");
+    fun setUp() {
+        delimiters.add("{{*}}")
     }
 
     @Test
-    public void shouldOverwriteCopiedFileWithAGeneratedTemplate() {
+    fun shouldOverwriteCopiedFileWithAGeneratedTemplate() {
+        // Given ...
+        val fileConfigFileFactory: ConfigFileFactory = FileApplicationConfigFactory(SOURCE_DIR, TARGET_DIR)
+        val templateConfigFileFactory: ConfigFileFactory = TemplateApplicationConfigFactory(SOURCE_DIR, TARGET_DIR, delimiters)
+        val configFileFactory: ConfigFileFactory = CompositeConfigFileFactory(fileConfigFileFactory, templateConfigFileFactory)
 
-        ConfigFileFactory fileConfigFileFactory = new FileApplicationConfigFactory(SOURCE_DIR, TARGET_DIR);
-        ConfigFileFactory templateConfigFileFactory = new TemplateApplicationConfigFactory(SOURCE_DIR, TARGET_DIR, delimiters);
-        ConfigFileFactory configFileFactory = new CompositeConfigFileFactory(fileConfigFileFactory, templateConfigFileFactory);
+        // When ...
+        configFileFactory.generateFiles()
 
-        configFileFactory.generateFiles();
+        // Then ...
+        Assert.assertThat(File(TARGET_DIR, "env1/app1/global-template-override.conf"), hasProperty("type", CoreMatchers.equalTo("generated")))
+        Assert.assertThat(File(TARGET_DIR, "env1/app2/global-template-override.conf"), hasProperty("type", CoreMatchers.equalTo("generated")))
+        Assert.assertThat(File(TARGET_DIR, "env2/app1/global-template-override.conf"), hasProperty("type", CoreMatchers.equalTo("generated")))
+        Assert.assertThat(File(TARGET_DIR, "env2/app2/global-template-override.conf"), hasProperty("type", CoreMatchers.equalTo("generated")))
+    }
 
-        assertThat(new File(TARGET_DIR, "env1/app1/global-template-override.conf"), hasProperty("type", equalTo("generated")));
-        assertThat(new File(TARGET_DIR, "env1/app2/global-template-override.conf"), hasProperty("type", equalTo("generated")));
-        assertThat(new File(TARGET_DIR, "env2/app1/global-template-override.conf"), hasProperty("type", equalTo("generated")));
-        assertThat(new File(TARGET_DIR, "env2/app2/global-template-override.conf"), hasProperty("type", equalTo("generated")));
+    companion object {
+        val TARGET_DIR = File("target/generated-config/")
+        val SOURCE_DIR = File("src/test/resources")
     }
 }
