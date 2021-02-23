@@ -10,14 +10,12 @@ import org.slinkyframework.environment.config.maven.plugin.info.ConfigDirectoryW
 import java.io.File
 
 @Mojo(name = "info")
-class EnvironmentConfigInfoMojo : AbstractMojo()
-{
-    @Parameter(property = "config.sourceDir", defaultValue = "src/main/resources", readonly = true)
+class EnvironmentConfigInfoMojo : AbstractMojo() {
+    @Parameter(property = "config.sourceDir", defaultValue = "\${project.basedir}/src/main/resources", readonly = true)
     private lateinit var sourceDir: String
 
     @Throws(MojoExecutionException::class, MojoFailureException::class)
-    override fun execute()
-    {
+    override fun execute() {
         val directoryWalker = ConfigDirectoryWalker()
 
         directoryWalker.walk(File(sourceDir))

@@ -16,10 +16,10 @@ import java.io.File
 @Execute(goal = "merge", phase = LifecyclePhase.GENERATE_RESOURCES)
 class EnvironmentConfigMergeMojo : AbstractMojo()
 {
-    @Parameter(property = "config.sourceDir", defaultValue = "src/main/resources", readonly = true)
+    @Parameter(property = "config.sourceDir", defaultValue = "\${project.basedir}/src/main/resources", readonly = true)
     private lateinit var sourceDir: String
 
-    @Parameter(property = "config.targetDir", defaultValue = "target/generated-config", readonly = true)
+    @Parameter(property = "config.targetDir", defaultValue = "\${project.build.directory}/generated-config", readonly = true)
     private lateinit var targetDir: String
 
     /**

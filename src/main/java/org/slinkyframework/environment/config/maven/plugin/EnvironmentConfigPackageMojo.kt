@@ -16,7 +16,7 @@ import java.io.File
 @Execute(goal = "package", phase = LifecyclePhase.PACKAGE)
 class EnvironmentConfigPackageMojo : AbstractMojo()
 {
-    @Parameter(property = "config.targetDir", defaultValue = "target/generated-config", readonly = true)
+    @Parameter(property = "config.targetDir", defaultValue = "\${project.build.directory}/generated-config", readonly = true)
     private lateinit var targetDir: String
 
     @Parameter(defaultValue = "\${project}", required = true, readonly = true)

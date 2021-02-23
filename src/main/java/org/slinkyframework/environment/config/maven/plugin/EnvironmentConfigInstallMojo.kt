@@ -15,11 +15,9 @@ import org.apache.maven.shared.transfer.repository.RepositoryManager
 import org.slinkyframework.environment.config.maven.plugin.install.MavenInstaller
 import java.io.File
 
-
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INSTALL)
-class EnvironmentConfigInstallMojo : AbstractMojo()
-{
-    @Parameter(property = "config.targetDir", defaultValue = "target/generated-config", readonly = true)
+class EnvironmentConfigInstallMojo : AbstractMojo() {
+    @Parameter(property = "config.targetDir", defaultValue = "\${project.build.directory}/generated-config", readonly = true)
     private lateinit var targetDir: String
 
     @Parameter(defaultValue = "\${project}", required = true, readonly = true)
@@ -38,8 +36,7 @@ class EnvironmentConfigInstallMojo : AbstractMojo()
     private lateinit var installer: ProjectInstaller
 
     @Throws(MojoExecutionException::class, MojoFailureException::class)
-    override fun execute()
-    {
+    override fun execute() {
         val mavenInstaller = MavenInstaller(
                 project.basedir.toPath(), project.groupId, project.version, File(targetDir).toPath(),
                 session, projectBuilder, repositoryManager, installer)
