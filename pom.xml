@@ -10,7 +10,7 @@
 
     <groupId>org.slinkyframework.environment</groupId>
     <artifactId>slinky-environment-config-maven-plugin</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
 
@@ -34,7 +34,7 @@
         <url>https://github.com/klyall/slinky-environment-config-maven-plugin</url>
         <connection>scm:git:https://github.com/klyall/slinky-environment-config-maven-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/klyall/slinky-environment-config-maven-plugin.git</developerConnection>
-        <tag>slinky-environment-config-maven-plugin-1.1.4</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <url>https://github.com/klyall/slinky-environment-config-maven-plugin/issues</url>
